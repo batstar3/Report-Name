@@ -1,0 +1,400 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #A6D0F0 0%, #F0F1F5 50%, #A6D0F0 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Manga Background Elements */
+        .manga-bg {
+            position: fixed;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+        }
+
+        .manga-bg-1 {
+            top: 10%;
+            right: 8%;
+            width: 300px;
+            height: 350px;
+            background-image: url('fondo\ 2.png');
+        }
+
+        .manga-bg-2 {
+            bottom: 15%;
+            left: 10%;
+            width: 300px;
+            height: 350px;
+            background-image: url('fondo\ 1.png');
+        }
+
+        .manga-bg-3 {
+            top: 50%;
+            right: 5%;
+            width: 300px;
+            height: 350px;
+            background-image: url('fondo\ 3.png');
+        }
+        .manga-bg-4 {
+            top: 10%;
+            left: 8%;
+            width: 300px;
+            height: 350px;
+            background-image: url('fondo\ 4.png');
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #F0F1F5;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 2px solid #C4C7D0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #A6D0F0 0%, #C4C7D0 100%);
+            color: #333;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background-image: url('logo.png'); /* o 'img/logo.png' si lo pones en subcarpeta */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        .header-text {
+             display: flex;
+            flex-direction: column;
+            align-items: center; /* Centra horizontalmente */
+            justify-content: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #333;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            color: #333;
+        }
+
+        .content {
+            padding: 40px;
+            background: #F0F1F5;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0F1F5 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #C4C7D0;
+            border-left: 6px solid #A6D0F0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(166, 208, 240, 0.2);
+            border-left-color: #E04DA8;
+        }
+
+        .step h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #C4C7D0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #FFFFFF;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #A6D0F0;
+            box-shadow: 0 0 0 3px rgba(166, 208, 240, 0.2);
+        }
+
+        .textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #A6D0F0 0%, #C4C7D0 100%);
+            color: #333;
+            border: 2px solid #C4C7D0;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(240, 241, 245, 0.5), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(166, 208, 240, 0.3);
+            border-color: #A6D0F0;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #C4C7D0 0%, #A6D0F0 100%);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #E04DA8 0%, #BE2E4D 100%);
+            color: white;
+            border-color: #BE2E4D;
+            font-size: 1.3rem;
+            padding: 20px 40px;
+            margin: 20px 0;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 25px rgba(224, 77, 168, 0.3);
+        }
+
+        .format-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #C4C7D0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #FFFFFF;
+        }
+
+        .option:hover {
+            border-color: #A6D0F0;
+            background: #F0F1F5;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(166, 208, 240, 0.2);
+            border: 2px solid #C4C7D0;
+        }
+
+        .preview-table th {
+            background: linear-gradient(135deg, #A6D0F0 0%, #C4C7D0 100%);
+            color: #333;
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-table td {
+            padding: 15px;
+            border-bottom: 1px solid #C4C7D0;
+            font-weight: 500;
+        }
+
+        .preview-table tr:hover {
+            background: #F0F1F5;
+        }
+
+        .old-name {
+            color: #BE2E4D;
+            text-decoration: line-through;
+            font-weight: 600;
+        }
+
+        .new-name {
+            color: #E04DA8;
+            font-weight: 700;
+        }
+
+        .output {
+            background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+            color: #F0F1F5;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            font-family: 'Courier New', monospace;
+            max-height: 450px;
+            overflow-y: auto;
+            border: 2px solid #C4C7D0;
+        }
+
+        .command {
+            background: rgba(240, 241, 245, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px 0;
+            word-break: break-all;
+            font-size: 0.95rem;
+            border-left: 3px solid #A6D0F0;
+            transition: all 0.3s ease;
+        }
+
+        .command:hover {
+            background: rgba(240, 241, 245, 0.2);
+            border-left-color: #F3EB00;
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #F3EB00 0%, rgba(243, 235, 0, 0.3) 100%);
+            border: 2px solid #F3EB00;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #A6D0F0 0%, rgba(166, 208, 240, 0.3) 100%);
+            border: 2px solid #A6D0F0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .drag-area {
+            border: 3px dashed #A6D0F0;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            background: linear-gradient(135deg, #F0F1F5 0%, #FFFFFF 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drag-area.dragover {
+            background: linear-gradient(135deg, #A6D0F0 0%, #F0F1F5 100%);
+            border-color: #E04DA8;
+        }
+
+        .drag-area:hover {
+            background: linear-gradient(135deg, #A6D0F0 0%, #F0F1F5 100%);
+            transform: translateY(-2px);
+        }
+
+        .highlight {
+            color: #F3EB00;
+            font-weight: bold;
+            background: rgba(243, 235, 0, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-text {
+                align-items: center;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }

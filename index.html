@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="renombrador_estilos.css">
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+</head>
+<body>
+    <div class="manga-bg manga-bg-1"></div>
+    <div class="manga-bg manga-bg-2"></div>
+    <div class="manga-bg manga-bg-3"></div>
+    <div class="manga-bg manga-bg-4"></div>
+    
+    <div class="container">
+    <div class="header">
+        <div class="header-icon"></div>
+        <div class="header-text">
+            <h1>REPORT NAME</h1>
+            <p></p>
+        </div>
+        <div class="header-icon"></div>
+        </div>
+        
+        <div class="content">
+            <div class="instructions">
+                <strong>INSTRUCCIONES DE USO:</strong>
+                <ol style="margin-top: 15px; padding-left: 25px;">
+                    <li>Lista los nombres actuales de tus archivos/carpetas (uno por línea)</li>
+                    <li>Configura el nuevo formato de nombres deseado</li>
+                    <li>Genera y copia los comandos resultantes</li>
+                    <li>Ejecuta en Command Prompt desde la ubicación correcta</li>
+                </ol>
+            </div>
+
+            <div class="step">
+                <h3>Lista de Archivos Actuales</h3>
+                <div class="input-group">
+                    <label for="currentFolders">Ingresa los nombres actuales de tus archivos (uno por línea):</label>
+                    <textarea id="currentFolders" class="input-field textarea" placeholder="Ejemplo:
+Report - Archivo 01
+Report - Archivo 02  
+Report - Archivo 03
+..."></textarea>
+                </div>
+                <button class="btn btn-secondary" onclick="generateSampleList()">Generar Lista de Ejemplo</button>
+                <button class="btn btn-secondary" onclick="generateDirCommand()">Generar Comando DIR</button>
+            </div>
+
+            <div class="step">
+                <h3>Configurar Nuevo Formato</h3>
+                <div class="input-group">
+                    <label for="newBaseName">Nombre base para los nuevos archivos:</label>
+                    <input type="text" id="newBaseName" class="input-field" placeholder="Ej: Report - Documento" value="Report - Archivo">
+                </div>
+
+                <div class="input-group">
+                    <label>Formato de numeración:</label>
+                    <div class="format-options">
+                        <div class="option">
+                            <input type="radio" name="format" value="simple" id="simple" checked>
+                            <label for="simple">Simple (1, 2, 3...)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="format" value="padded" id="padded">
+                            <label for="padded">Con ceros (01, 02, 03...)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="format" value="sequential" id="sequential">
+                            <label for="sequential">Mantener orden actual</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="startNumber">Número inicial:</label>
+                    <input type="number" id="startNumber" class="input-field" value="1" min="0" max="999">
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>Generar Comandos</h3>
+                <button class="btn btn-primary" onclick="generateRenameCommands()">
+                    GENERAR COMANDOS DE RENOMBRADO
+                </button>
+            </div>
+
+            <div id="previewSection" style="display: none;">
+                <div class="step">
+                    <h3>Vista Previa de Cambios</h3>
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre Actual</th>
+                                <th>Nuevo Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="outputSection" style="display: none;">
+                <div class="step">
+                    <h3>Comandos para Windows</h3>
+                    <button class="btn" onclick="copyCommands()">Copiar Todos los Comandos</button>
+                    <button class="btn btn-secondary" onclick="downloadBatchFile()">Descargar como .bat</button>
+                    <div id="commandsOutput" class="output"></div>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>IMPORTANTE - LEER ANTES DE USAR:</strong>
+                <ul style="margin-top: 15px; padding-left: 25px;">
+                    <li>Haz una copia de seguridad</span> de tus archivos antes de ejecutar</li>
+                    <li>Los comandos deben ejecutarse desde la carpeta donde están ubicados los archivos</li>
+                    <li>Si hay espacios en los nombres, asegúrate de que estén entre comillas</li>
+                    <li>Prueba primero con un archivo para verificar que funciona correctamente</li>
+                </ul>
+            </div>
+        </div>
+        <script>
+    function downloadBatchFile() {
+      const outputDiv = document.getElementById("commandsOutput");
+      let texto = outputDiv.innerText || outputDiv.textContent;
+
+      if (!texto.trim()) {
+        alert("No hay comandos para guardar.");
+        return;
+      }
+
+      const blob = new Blob([texto], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "comandos.bat";
+      document.body.appendChild(a);
+      a.click();
+
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
+✅ Opción 2: Usas un archivo .js externo
+Si tu página carga un archivo como main.js o script.js, entonces simplemente pega este código al final de ese archivo:
+
+javascript
+Copiar
+Editar
+function downloadBatchFile() {
+  const outputDiv = document.getElementById("commandsOutput");
+  let texto = outputDiv.innerText || outputDiv.textContent;
+
+  if (!texto.trim()) {
+    alert("No hay comandos para guardar.");
+    return;
+  }
+
+  const blob = new Blob([texto], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "comandos.bat";
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+    </div>
+
+    <script>
+        function generateSampleList() {
+            const sample = [];
+            for (let i = 1; i <= 25; i++) {
+                const num = i.toString().padStart(2, '0');
+                sample.push(`Report - Archivo ${num}`);
+            }
+            document.getElementById('currentFolders').value = sample.join('\n');
+        }
+
+        function generateDirCommand() {
+            const dirCommand = 'dir /b /ad > lista_archivos.txt';
+            
+            const output = document.createElement('div');
+            output.innerHTML = `
+                <div class="step">
+                    <h3>Comando para listar archivos</h3>
+                    <p>Ejecuta este comando en Command Prompt desde la carpeta donde están tus archivos:</p>
+                    <div class="output">
+                        <div class="command">${dirCommand}</div>
+                    </div>
+                    <p style="margin-top: 15px;">
+                        Esto creará un archivo "lista_archivos.txt" con todos los nombres.
+                        Abre ese archivo, copia el contenido y pégalo en el campo de arriba.
+                    </p>
+                    <button class="btn" onclick="copyToClipboard('${dirCommand}')">Copiar Comando</button>
+                </div>
+            `;
+            
+            const firstStep = document.querySelector('.step');
+            firstStep.parentNode.insertBefore(output, firstStep.nextSibling);
+        }
+
+        function generateRenameCommands() {
+            const currentFoldersText = document.getElementById('currentFolders').value.trim();
+            const newBaseName = document.getElementById('newBaseName').value.trim();
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const startNumber = parseInt(document.getElementById('startNumber').value);
+
+            if (!currentFoldersText) {
+                alert('Por favor ingresa los nombres actuales de los archivos');
+                return;
+            }
+
+            if (!newBaseName) {
+                alert('Por favor ingresa un nombre base para los nuevos archivos');
+                return;
+            }
+
+            const currentFolders = currentFoldersText.split('\n').filter(line => line.trim() !== '');
+            const commands = [];
+            const preview = [];
+
+            currentFolders.forEach((currentName, index) => {
+                const currentNumber = startNumber + index;
+                let newName;
+
+                switch (format) {
+                    case 'simple':
+                        newName = `${newBaseName} ${currentNumber}`;
+                        break;
+                    case 'padded':
+                        const paddedNumber = currentNumber.toString().padStart(2, '0');
+                        newName = `${newBaseName} ${paddedNumber}`;
+                        break;
+                    case 'sequential':
+                        newName = `${newBaseName} ${index + 1}`;
+                        break;
+                }
+
+                if (currentName.trim() !== newName) {
+                    const command = `ren "${currentName.trim()}" "${newName}"`;
+                    commands.push(command);
+                }
+
+                preview.push({
+                    current: currentName.trim(),
+                    new: newName
+                });
+            });
+
+            displayPreview(preview);
+            displayCommands(commands);
+        }
+
+        function displayPreview(preview) {
+            const previewSection = document.getElementById('previewSection');
+            const previewTableBody = document.getElementById('previewTableBody');
+            
+            previewTableBody.innerHTML = '';
+            
+            preview.forEach(item => {
+                const row = document.createElement('tr');
+                const isChanged = item.current !== item.new;
+                
+                row.innerHTML = `
+                    <td class="${isChanged ? 'old-name' : ''}">${item.current}</td>
+                    <td class="${isChanged ? 'new-name' : ''}">${item.new}</td>
+                `;
+                previewTableBody.appendChild(row);
+            });
+            
+            previewSection.style.display = 'block';
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayCommands(commands) {
+            const outputSection = document.getElementById('outputSection');
+            const commandsOutput = document.getElementById('commandsOutput');
+            
+            commandsOutput.innerHTML = '';
+            
+            if (commands.length === 0) {
+                commandsOutput.innerHTML = '<div class="command" style="color: #F3EB00;">No hay cambios necesarios - los nombres ya están en el formato deseado</div>';
+            } else {
+                const comments = [
+                    '@echo off',
+                    'REM ===== REPORT NAME - SCRIPT DE RENOMBRADO =====',
+                    'REM Ejecutar desde la carpeta donde están ubicados los archivos',
+                    'echo Iniciando proceso de renombrado...',
+                    'echo.',
+                    ''
+                ];
+                
+                comments.forEach(comment => {
+                    const div = document.createElement('div');
+                    div.className = 'command';
+                    div.style.color = '#A6D0F0';
+                    div.textContent = comment;
+                    commandsOutput.appendChild(div);
+                });
+
+                commands.forEach(command => {
+                    const div = document.createElement('div');
+                    div.className = 'command';
+                    div.textContent = command;
+                    commandsOutput.appendChild(div);
+                });
+
+                const finalComments = [
+                    'echo.',
+                    'echo Proceso de renombrado completado exitosamente!',
+                    'echo ===== REPORT NAME =====',
+                    'pause'
+                ];
+
+                finalComments.forEach(comment => {
+                    const div = document.createElement('div');
+                    div.className = 'command';
+                    div.style.color = '#A6D0F0';
+                    div.textContent = comment;
+                    commandsOutput.appendChild(div);
+                });
+            }
+            
+            outputSection.style.display = 'block';
+            outputSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyCommands() {
+            const commands = document.querySelectorAll('.command');
+            let textToCopy = '';
+            
+            commands.forEach(command => {
+                textToCopy += command.textContent + '\n';
+            });
+            
+            copyToClipboard(textToCopy);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copiado al portapapeles exitosamente!');
+                alert('The World');
+            });
+        }
+    </script>
+</body>
+</html>
