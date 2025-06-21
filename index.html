@@ -144,34 +144,7 @@ Report - Archivo 03
     }
   </script>
 </body>
-</html>
-✅ Opción 2: Usas un archivo .js externo
-Si tu página carga un archivo como main.js o script.js, entonces simplemente pega este código al final de ese archivo:
 
-javascript
-Copiar
-Editar
-function downloadBatchFile() {
-  const outputDiv = document.getElementById("commandsOutput");
-  let texto = outputDiv.innerText || outputDiv.textContent;
-
-  if (!texto.trim()) {
-    alert("No hay comandos para guardar.");
-    return;
-  }
-
-  const blob = new Blob([texto], { type: "application/octet-stream" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "comandos.bat";
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
     </div>
 
     <script>
