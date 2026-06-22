@@ -158,6 +158,11 @@ Report - Archivo 03
             'tw_25.jpg','tw_26.jpg','tw_27.jpg','tw_28.jpg','tw_29.jpg'
         ];
 
+        // Precargar imágenes al cargar la página
+        window.addEventListener('load', () => {
+            DIO_IMAGES.forEach(src => { const img = new Image(); img.src = src; });
+        });
+
         function triggerTheWorld(afterFn) {
             const overlay = document.getElementById('theWorldOverlay');
             const bg      = document.getElementById('theWorldBg');
