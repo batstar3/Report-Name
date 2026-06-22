@@ -1,73 +1,105 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="renombrador_estilos.css">
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="renombrador_estilos.css">
 </head>
 <body>
     <div class="manga-bg manga-bg-1"></div>
     <div class="manga-bg manga-bg-2"></div>
     <div class="manga-bg manga-bg-3"></div>
     <div class="manga-bg manga-bg-4"></div>
-    
+
+    <!-- THE WORLD overlay -->
+    <div id="theWorldOverlay" class="the-world-overlay">
+        <div class="the-world-bg" id="theWorldBg"></div>
+        <div class="the-world-text">THE WORLD</div>
+    </div>
+
+    <!-- Toast global -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Audio The World -->
+    <audio id="theWorldAudio" src="dio_the_world_sound_effect.mp3" preload="auto"></audio>
+
     <div class="container">
-    <div class="header">
-        <div class="header-icon"></div>
-        <div class="header-text">
-            <h1>REPORT NAME</h1>
-            <p></p>
+        <div class="header">
+            <div class="header-icon"></div>
+            <div class="header-text">
+                <h1>REPORT NAME</h1>
+                <p></p>
+            </div>
+            <div class="header-icon"></div>
         </div>
-        <div class="header-icon"></div>
-        </div>
-        
+
         <div class="content">
+
+
+
             <div class="instructions">
                 <strong>INSTRUCCIONES DE USO:</strong>
                 <ol style="margin-top: 15px; padding-left: 25px;">
-                    <li>Lista los nombres actuales de tus archivos/carpetas (uno por línea)</li>
+                    <li>Lista los nombres actuales de tus archivos/carpetas (uno por línea) o arrastra un .txt</li>
                     <li>Configura el nuevo formato de nombres deseado</li>
                     <li>Genera y copia los comandos resultantes</li>
                     <li>Ejecuta en Command Prompt desde la ubicación correcta</li>
                 </ol>
             </div>
 
+            <!-- PASO 1 -->
             <div class="step">
                 <h3>Lista de Archivos Actuales</h3>
-                <div class="input-group">
-                    <label for="currentFolders">Ingresa los nombres actuales de tus archivos (uno por línea):</label>
+                <div class="file-counter" id="fileCounter" style="display:none;">
+                    <span id="fileCountText">0 archivos detectados</span>
+                </div>
+
+                <!-- Drag & Drop zone -->
+                <div class="drag-zone" id="dragZone">
+                    <span>📄 Arrastra un archivo <strong>.txt</strong> aquí</span>
+                </div>
+
+                <div class="input-group" style="margin-top:15px;">
+                    <label for="currentFolders">O ingresa los nombres manualmente (uno por línea):</label>
                     <textarea id="currentFolders" class="input-field textarea" placeholder="Ejemplo:
 Report - Archivo 01
-Report - Archivo 02  
+Report - Archivo 02
 Report - Archivo 03
-..."></textarea>
+..." oninput="onListChange(false)"></textarea>
                 </div>
-            
-                <button class="btn btn-secondary" onclick="generateDirCommand()">Generar Comando DIR</button>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="generateDirCommand()">Generar Comando DIR</button>
+                    <button class="btn btn-reset" onclick="resetAll()">🗑 Limpiar Todo</button>
+                </div>
+
+                <div id="dirCommandSection" style="display:none; margin-top: 20px;">
+                    <p>Ejecuta este comando en Command Prompt desde la carpeta donde están tus archivos:</p>
+                    <div class="output" style="margin-top:10px;">
+                        <div class="command">dir /b &gt; lista_archivos.txt</div>
+                    </div>
+                    <p style="margin-top: 15px;">Esto creará un archivo "lista_archivos.txt" con todos los nombres. Abre ese archivo, copia el contenido y pégalo en el campo de arriba.</p>
+                </div>
             </div>
 
+            <!-- PASO 2 -->
             <div class="step">
                 <h3>Configurar Nuevo Formato</h3>
                 <div class="input-group">
                     <label for="newBaseName">Nombre base para los nuevos archivos:</label>
-                    <input type="text" id="newBaseName" class="input-field" placeholder="Ej: Report - Documento" value="Report - Archivo">
+                    <input type="text" id="newBaseName" class="input-field" placeholder="Ej: Atelier of Witch Hat - Tomo" value="">
                 </div>
 
                 <div class="input-group">
                     <label>Formato de numeración:</label>
                     <div class="format-options">
                         <div class="option">
-                            <input type="radio" name="format" value="simple" id="simple" checked>
-                            <label for="simple">Simple (1, 2, 3...)</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" name="format" value="padded" id="padded">
+                            <input type="radio" name="format" value="padded" id="padded" checked>
                             <label for="padded">Con ceros (01, 02, 03...)</label>
                         </div>
                         <div class="option">
-                            <input type="radio" name="format" value="sequential" id="sequential">
-                            <label for="sequential">Mantener orden actual</label>
+                            <input type="radio" name="format" value="simple" id="simple">
+                            <label for="simple">Simple (1, 2, 3...)</label>
                         </div>
                     </div>
                 </div>
@@ -78,6 +110,7 @@ Report - Archivo 03
                 </div>
             </div>
 
+            <!-- PASO 3 -->
             <div class="step">
                 <h3>Generar Comandos</h3>
                 <button class="btn btn-primary" onclick="generateRenameCommands()">
@@ -95,233 +128,270 @@ Report - Archivo 03
                                 <th>Nuevo Nombre</th>
                             </tr>
                         </thead>
-                        <tbody id="previewTableBody">
-                        </tbody>
+                        <tbody id="previewTableBody"></tbody>
                     </table>
-                </div>
-            </div>
-
-            <div id="outputSection" style="display: none;">
-                <div class="step">
-                    <h3>Comandos para Windows</h3>
-                    <button class="btn" onclick="copyCommands()">Copiar Todos los Comandos</button>
-                    <button class="btn btn-secondary" onclick="downloadBatchFile()">Descargar como .bat</button>
-                    <div id="commandsOutput" class="output"></div>
                 </div>
             </div>
 
             <div class="warning">
                 <strong>IMPORTANTE - LEER ANTES DE USAR:</strong>
                 <ul style="margin-top: 15px; padding-left: 25px;">
-                    <li>Haz una copia de seguridad</span> de tus archivos antes de ejecutar</li>
+                    <li>Haz una copia de seguridad de tus archivos antes de ejecutar</li>
                     <li>Los comandos deben ejecutarse desde la carpeta donde están ubicados los archivos</li>
                     <li>Si hay espacios en los nombres, asegúrate de que estén entre comillas</li>
                     <li>Prueba primero con un archivo para verificar que funciona correctamente</li>
                 </ul>
             </div>
         </div>
-        <script>
-    function downloadBatchFile() {
-      const outputDiv = document.getElementById("commandsOutput");
-      let texto = outputDiv.innerText || outputDiv.textContent;
-
-      if (!texto.trim()) {
-        alert("No hay comandos para guardar.");
-        return;
-      }
-
-      const blob = new Blob([texto], { type: "application/octet-stream" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "comandos.bat";
-      document.body.appendChild(a);
-      a.click();
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  </script>
-</body>
-
     </div>
 
     <script>
-        function generateSampleList() {
-            const sample = [];
-            for (let i = 1; i <= 25; i++) {
-                const num = i.toString().padStart(2, '0');
-                sample.push(`Report - Archivo ${num}`);
+
+
+        // ── THE WORLD ─────────────────────────────────────────────────
+        const DIO_IMAGES = [
+            'tw_1.webp','tw_2.jpg','tw_3.png','tw_4.png','tw_5.jpg',
+            'tw_6.jpg','tw_7.jpg','tw_8.jpg','tw_9.jpg',
+            'tw_10.jpg','tw_11.jpg','tw_12.jpg','tw_13.jpg','tw_14.jpg',
+            'tw_15.jpg','tw_16.jpg','tw_17.jpg','tw_18.jpg','tw_19.jpg',
+            'tw_20.jpg','tw_21.jpg','tw_22.jpg','tw_23.jpg','tw_24.jpg',
+            'tw_25.jpg','tw_26.jpg','tw_27.jpg','tw_28.jpg','tw_29.jpg'
+        ];
+
+        function triggerTheWorld(afterFn) {
+            const overlay = document.getElementById('theWorldOverlay');
+            const bg      = document.getElementById('theWorldBg');
+            const audio   = document.getElementById('theWorldAudio');
+
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+
+            overlay.classList.add('active');
+
+            // Slideshow: cambia imagen cada ~93ms durante 2.5s (3x más rápido)
+            // Cada frame elige imagen 100% aleatoria (distinta a la anterior)
+            const totalDuration = 2500;
+            const interval = 93;
+            let lastIdx = -1;
+
+            function pickRandom() {
+                let idx;
+                do { idx = Math.floor(Math.random() * DIO_IMAGES.length); } while (idx === lastIdx && DIO_IMAGES.length > 1);
+                lastIdx = idx;
+                return DIO_IMAGES[idx];
             }
-            document.getElementById('currentFolders').value = sample.join('\n');
+
+            bg.style.backgroundImage = `url('${pickRandom()}')`;
+            bg.style.opacity = '0.45';
+
+            const timer = setInterval(() => {
+                // Flash entre fotos
+                bg.style.opacity = '0';
+                setTimeout(() => {
+                    bg.style.backgroundImage = `url('${pickRandom()}')`;
+                    bg.style.opacity = '0.45';
+                }, 20);
+            }, interval);
+
+            setTimeout(() => {
+                clearInterval(timer);
+                bg.style.opacity = '0';
+                overlay.classList.remove('active');
+                if (afterFn) afterFn();
+            }, totalDuration);
         }
 
+        // ── Toast ─────────────────────────────────────────────────────
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ── Drag & Drop ───────────────────────────────────────────────
+        const dragZone = document.getElementById('dragZone');
+
+        dragZone.addEventListener('dragover', e => { e.preventDefault(); dragZone.classList.add('drag-over'); });
+        dragZone.addEventListener('dragleave', () => dragZone.classList.remove('drag-over'));
+        dragZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dragZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (!file || !file.name.endsWith('.txt')) { showToast('⚠ Solo se aceptan archivos .txt'); return; }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                // Limpiar saltos de línea de Windows (\r\n → \n)
+                const cleaned = ev.target.result.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+                document.getElementById('currentFolders').value = cleaned;
+                onListChange(true);
+                showToast('✓ Archivo cargado');
+                // Scroll al campo de nombre base
+                setTimeout(() => {
+                    document.getElementById('newBaseName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            };
+            reader.readAsText(file);
+        });
+
+        // ── Reset ─────────────────────────────────────────────────────
+        function resetAll() {
+            document.getElementById('currentFolders').value = '';
+            document.getElementById('newBaseName').value = '';
+            document.getElementById('startNumber').value = '1';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('dirCommandSection').style.display = 'none';
+            document.getElementById('fileCounter').style.display = 'none';
+            document.getElementById('previewTableBody').innerHTML = '';
+            dirGenerated = false;
+            showToast('🗑 Todo limpiado');
+        }
+
+        // ── onListChange: suggestName solo si fromDrop=true ──────────
+        function onListChange(fromDrop) {
+            const lines = document.getElementById('currentFolders').value
+                .split('\n').filter(l => l.trim());
+
+            const counter  = document.getElementById('fileCounter');
+            const countTxt = document.getElementById('fileCountText');
+            if (lines.length > 0) {
+                counter.style.display = 'block';
+                countTxt.textContent = `${lines.length} archivo${lines.length !== 1 ? 's' : ''} detectado${lines.length !== 1 ? 's' : ''}`;
+            } else {
+                counter.style.display = 'none';
+            }
+
+            if (fromDrop) {
+                suggestBaseName(lines);
+            }
+        }
+
+        // ── Auto-sugerir nombre base ──────────────────────────────────
+        function suggestBaseName(lines) {
+            if (!lines || !lines.length) return;
+
+            // Extraer prefijos candidatos de cada línea (antes del número final)
+            const candidates = {};
+            lines.forEach(line => {
+                const t = line.trim();
+                // Quitar extensión
+                const noExt = t.replace(/\.[a-zA-Z0-9]+$/, '');
+                // Quitar número final y guiones/espacios sobrantes
+                const prefix = noExt
+                    .replace(/\s*[\(\[].*$/, '')
+                    .replace(/[-\s]*\d+[-\s]*$/, '')
+                    .replace(/[-\s]+$/, '')
+                    .trim();
+                if (prefix.length > 2) {
+                    candidates[prefix] = (candidates[prefix] || 0) + 1;
+                }
+            });
+
+            if (!Object.keys(candidates).length) return;
+
+            // Elegir el prefijo más frecuente
+            const best = Object.entries(candidates).sort((a, b) => b[1] - a[1])[0][0];
+
+            if (best.length > 2) {
+                const suggestion = /tomo$/i.test(best) ? best : best + ' - Tomo';
+                document.getElementById('newBaseName').value = suggestion;
+            }
+
+            // Auto-detectar número inicial desde la primera línea que tenga ese prefijo
+            const firstMatch = lines.find(l => l.trim().startsWith(best));
+            if (firstMatch) {
+                const numMatch = firstMatch.trim().match(/(\d+)[^\d]*(\.[a-zA-Z0-9]+)?$/);
+                if (numMatch) document.getElementById('startNumber').value = parseInt(numMatch[1]);
+            }
+        }
+
+
+
+        // ── DIR command — sin scroll ──────────────────────────────────
+        let dirGenerated = false;
         function generateDirCommand() {
-            const dirCommand = 'dir /b /ad > lista_archivos.txt';
-            
-            const output = document.createElement('div');
-            output.innerHTML = `
-                <div class="step">
-                    <h3>Comando para listar archivos</h3>
-                    <p>Ejecuta este comando en Command Prompt desde la carpeta donde están tus archivos:</p>
-                    <div class="output">
-                        <div class="command">${dirCommand}</div>
-                    </div>
-                    <p style="margin-top: 15px;">
-                        Esto creará un archivo "lista_archivos.txt" con todos los nombres.
-                        Abre ese archivo, copia el contenido y pégalo en el campo de arriba.
-                    </p>
-                    <button class="btn" onclick="copyToClipboard('${dirCommand}')">Copiar Comando</button>
-                </div>
-            `;
-            
-            const firstStep = document.querySelector('.step');
-            firstStep.parentNode.insertBefore(output, firstStep.nextSibling);
+            const section = document.getElementById('dirCommandSection');
+            section.style.display = 'block';
+            // sin scrollIntoView
+            if (!dirGenerated) {
+                dirGenerated = true;
+                navigator.clipboard.writeText('dir /b > lista_archivos.txt').then(() => {
+                    showToast('✓ Comando DIR copiado');
+                });
+            }
         }
 
+        // ── Generar comandos ──────────────────────────────────────────
         function generateRenameCommands() {
             const currentFoldersText = document.getElementById('currentFolders').value.trim();
             const newBaseName = document.getElementById('newBaseName').value.trim();
             const format = document.querySelector('input[name="format"]:checked').value;
             const startNumber = parseInt(document.getElementById('startNumber').value);
 
-            if (!currentFoldersText) {
-                alert('Por favor ingresa los nombres actuales de los archivos');
-                return;
-            }
+            if (!currentFoldersText) { alert('Por favor ingresa los nombres actuales de los archivos'); return; }
+            if (!newBaseName)        { alert('Por favor ingresa un nombre base para los nuevos archivos'); return; }
 
-            if (!newBaseName) {
-                alert('Por favor ingresa un nombre base para los nuevos archivos');
-                return;
-            }
-
-            const currentFolders = currentFoldersText.split('\n').filter(line => line.trim() !== '');
-            const commands = [];
-            const preview = [];
+            const currentFolders = currentFoldersText.split('\n').filter(l => l.trim() !== '');
+            const commands = [], preview = [];
 
             currentFolders.forEach((currentName, index) => {
+                const trimmed = currentName.trim();
                 const currentNumber = startNumber + index;
-                let newName;
-
-                switch (format) {
-                    case 'simple':
-                        newName = `${newBaseName} ${currentNumber}`;
-                        break;
-                    case 'padded':
-                        const paddedNumber = currentNumber.toString().padStart(2, '0');
-                        newName = `${newBaseName} ${paddedNumber}`;
-                        break;
-                    case 'sequential':
-                        newName = `${newBaseName} ${index + 1}`;
-                        break;
-                }
-
-                if (currentName.trim() !== newName) {
-                    const command = `ren "${currentName.trim()}" "${newName}"`;
-                    commands.push(command);
-                }
-
-                preview.push({
-                    current: currentName.trim(),
-                    new: newName
-                });
+                const extMatch = trimmed.match(/(\.[a-zA-Z0-9]+)$/);
+                const ext = extMatch ? extMatch[1] : '';
+                const newNum = format === 'padded'
+                    ? currentNumber.toString().padStart(2, '0')
+                    : currentNumber.toString();
+                const newName = `${newBaseName} ${newNum}${ext}`;
+                if (trimmed !== newName) commands.push(`ren "${trimmed}" "${newName}"`);
+                preview.push({ current: trimmed, new: newName });
             });
 
-            displayPreview(preview);
-            displayCommands(commands);
+            if (commands.length > 0) {
+                const allText = buildCommandText(commands);
+                // Copiar ANTES de The World (el navegador requiere gesto directo del usuario)
+                navigator.clipboard.writeText(allText).catch(() => {});
+                triggerTheWorld(() => {
+                    showToast('✓ THE WORLD — Comandos copiados');
+                    displayPreview(preview);
+                });
+            } else {
+                displayPreview(preview);
+                showToast('Sin cambios necesarios');
+            }
+        }
+
+        function buildCommandText(commands) {
+            return [
+                '@echo off',
+                'REM ===== REPORT NAME - SCRIPT DE RENOMBRADO =====',
+                'REM Ejecutar desde la carpeta donde están ubicados los archivos',
+                'echo Iniciando proceso de renombrado...',
+                'echo.',
+                '',
+                ...commands,
+                'echo.',
+                'echo Proceso de renombrado completado exitosamente!',
+                'echo ===== REPORT NAME =====',
+                'pause'
+            ].join('\n');
         }
 
         function displayPreview(preview) {
             const previewSection = document.getElementById('previewSection');
-            const previewTableBody = document.getElementById('previewTableBody');
-            
-            previewTableBody.innerHTML = '';
-            
+            const tbody = document.getElementById('previewTableBody');
+            tbody.innerHTML = '';
             preview.forEach(item => {
                 const row = document.createElement('tr');
                 const isChanged = item.current !== item.new;
-                
                 row.innerHTML = `
-                    <td class="${isChanged ? 'old-name' : ''}">${item.current}</td>
-                    <td class="${isChanged ? 'new-name' : ''}">${item.new}</td>
+                    <td class="${isChanged ? 'old-name' : 'no-change'}">${item.current}</td>
+                    <td class="${isChanged ? 'new-name' : 'no-change'}">${item.new}</td>
                 `;
-                previewTableBody.appendChild(row);
+                tbody.appendChild(row);
             });
-            
             previewSection.style.display = 'block';
             previewSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function displayCommands(commands) {
-            const outputSection = document.getElementById('outputSection');
-            const commandsOutput = document.getElementById('commandsOutput');
-            
-            commandsOutput.innerHTML = '';
-            
-            if (commands.length === 0) {
-                commandsOutput.innerHTML = '<div class="command" style="color: #F3EB00;">No hay cambios necesarios - los nombres ya están en el formato deseado</div>';
-            } else {
-                const comments = [
-                    '@echo off',
-                    'REM ===== REPORT NAME - SCRIPT DE RENOMBRADO =====',
-                    'REM Ejecutar desde la carpeta donde están ubicados los archivos',
-                    'echo Iniciando proceso de renombrado...',
-                    'echo.',
-                    ''
-                ];
-                
-                comments.forEach(comment => {
-                    const div = document.createElement('div');
-                    div.className = 'command';
-                    div.style.color = '#A6D0F0';
-                    div.textContent = comment;
-                    commandsOutput.appendChild(div);
-                });
-
-                commands.forEach(command => {
-                    const div = document.createElement('div');
-                    div.className = 'command';
-                    div.textContent = command;
-                    commandsOutput.appendChild(div);
-                });
-
-                const finalComments = [
-                    'echo.',
-                    'echo Proceso de renombrado completado exitosamente!',
-                    'echo ===== REPORT NAME =====',
-                    'pause'
-                ];
-
-                finalComments.forEach(comment => {
-                    const div = document.createElement('div');
-                    div.className = 'command';
-                    div.style.color = '#A6D0F0';
-                    div.textContent = comment;
-                    commandsOutput.appendChild(div);
-                });
-            }
-            
-            outputSection.style.display = 'block';
-            outputSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function copyCommands() {
-            const commands = document.querySelectorAll('.command');
-            let textToCopy = '';
-            
-            commands.forEach(command => {
-                textToCopy += command.textContent + '\n';
-            });
-            
-            copyToClipboard(textToCopy);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Copiado al portapapeles exitosamente!');
-                alert('The World');
-            });
         }
     </script>
 </body>
