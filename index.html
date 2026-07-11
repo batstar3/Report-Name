@@ -252,7 +252,7 @@ Report - Archivo 03
             showToast('🗑 Todo limpiado');
         }
 
-        // ── onListChange: suggestName solo si fromDrop=true ──────────
+        // ── onListChange: sugiere nombre base siempre que la lista cambie ──
         function onListChange(fromDrop) {
             const lines = document.getElementById('currentFolders').value
                 .split('\n').filter(l => l.trim());
@@ -266,14 +266,13 @@ Report - Archivo 03
                 counter.style.display = 'none';
             }
 
-            if (fromDrop) {
-                suggestBaseName(lines);
-            }
+            suggestBaseName(lines);
         }
 
         // ── Auto-sugerir nombre base ──────────────────────────────────
         function suggestBaseName(lines) {
             if (!lines || !lines.length) return;
+            if (userEditedBaseName) return;
 
             // Extraer prefijos candidatos de cada línea (antes del número final)
             const candidates = {};
@@ -311,6 +310,12 @@ Report - Archivo 03
         }
 
 
+
+        // ── Trackear si el usuario editó manualmente el nombre base ────
+        let userEditedBaseName = false;
+        document.getElementById('newBaseName').addEventListener('input', () => {
+            userEditedBaseName = true;
+        });
 
         // ── DIR command — sin scroll ──────────────────────────────────
         let dirGenerated = false;
@@ -369,6 +374,7 @@ Report - Archivo 03
         function buildCommandText(commands) {
             return [
                 '@echo off',
+                'chcp 65001 > nul',
                 'REM ===== REPORT NAME - SCRIPT DE RENOMBRADO =====',
                 'REM Ejecutar desde la carpeta donde están ubicados los archivos',
                 'echo Iniciando proceso de renombrado...',
