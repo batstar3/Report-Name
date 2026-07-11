@@ -227,7 +227,11 @@ Report - Archivo 03
             const reader = new FileReader();
             reader.onload = ev => {
                 // Limpiar saltos de línea de Windows (\r\n → \n)
-                const cleaned = ev.target.result.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+                let cleaned = ev.target.result.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+                // Excluir la línea del propio archivo de listado (lista_archivos.txt)
+                cleaned = cleaned.split('\n')
+                    .filter(l => !/^lista_archivos\.txt$/i.test(l.trim()))
+                    .join('\n');
                 document.getElementById('currentFolders').value = cleaned;
                 onListChange(true);
                 showToast('✓ Archivo cargado');
@@ -269,44 +273,49 @@ Report - Archivo 03
             suggestBaseName(lines);
         }
 
-        // ── Auto-sugerir nombre base ──────────────────────────────────
+        // ── Auto-sugerir nombre base (prefijo común más largo) ─────────
         function suggestBaseName(lines) {
             if (!lines || !lines.length) return;
             if (userEditedBaseName) return;
 
-            // Extraer prefijos candidatos de cada línea (antes del número final)
-            const candidates = {};
-            lines.forEach(line => {
-                const t = line.trim();
-                // Quitar extensión
-                const noExt = t.replace(/\.[a-zA-Z0-9]+$/, '');
-                // Quitar número final y guiones/espacios sobrantes
-                const prefix = noExt
-                    .replace(/\s*[\(\[].*$/, '')
-                    .replace(/[-\s]*\d+[-\s]*$/, '')
-                    .replace(/[-\s]+$/, '')
-                    .trim();
-                if (prefix.length > 2) {
-                    candidates[prefix] = (candidates[prefix] || 0) + 1;
+            // Excluir el propio archivo de listado
+            const cleanLines = lines
+                .map(l => l.trim())
+                .filter(l => l && !/^lista_archivos\.txt$/i.test(l));
+            if (!cleanLines.length) return;
+
+            // Quitar extensión (solo si es corta, para no cortar números tipo "3 en 1")
+            const processed = cleanLines.map(l => l.replace(/\.[a-zA-Z0-9]{2,4}$/, ''));
+
+            // Prefijo común más largo entre todas las líneas
+            function commonPrefix(strs) {
+                let prefix = strs[0];
+                for (let i = 1; i < strs.length && prefix; i++) {
+                    let j = 0;
+                    const s = strs[i];
+                    while (j < prefix.length && j < s.length && prefix[j] === s[j]) j++;
+                    prefix = prefix.slice(0, j);
                 }
-            });
-
-            if (!Object.keys(candidates).length) return;
-
-            // Elegir el prefijo más frecuente
-            const best = Object.entries(candidates).sort((a, b) => b[1] - a[1])[0][0];
-
-            if (best.length > 2) {
-                const suggestion = /tomo$/i.test(best) ? best : best + ' - Tomo';
-                document.getElementById('newBaseName').value = suggestion;
+                return prefix;
             }
 
-            // Auto-detectar número inicial desde la primera línea que tenga ese prefijo
-            const firstMatch = lines.find(l => l.trim().startsWith(best));
-            if (firstMatch) {
-                const numMatch = firstMatch.trim().match(/(\d+)[^\d]*(\.[a-zA-Z0-9]+)?$/);
-                if (numMatch) document.getElementById('startNumber').value = parseInt(numMatch[1]);
-            }
+            let rawPrefix = commonPrefix(processed);
+
+            // Limpiar números/guiones/espacios sobrantes al final del prefijo
+            let best = rawPrefix
+                .replace(/[-\s]*\d+[-\s]*$/, '')
+                .replace(/[-\s]+$/, '')
+                .trim();
+
+            if (best.length <= 2) return;
+
+            const suggestion = /tomo$/i.test(best) ? best : best + ' - Tomo';
+            document.getElementById('newBaseName').value = suggestion;
+
+            // Detectar número inicial: dígitos justo después del prefijo detectado en la primera línea
+            const remainder = processed[0].slice(best.length);
+            const numMatch = remainder.match(/(\d+)/);
+            if (numMatch) document.getElementById('startNumber').value = parseInt(numMatch[1], 10);
         }
 
 
@@ -341,7 +350,12 @@ Report - Archivo 03
             if (!currentFoldersText) { alert('Por favor ingresa los nombres actuales de los archivos'); return; }
             if (!newBaseName)        { alert('Por favor ingresa un nombre base para los nuevos archivos'); return; }
 
-            const currentFolders = currentFoldersText.split('\n').filter(l => l.trim() !== '');
+            let currentFolders = currentFoldersText.split('\n').filter(l => l.trim() !== '');
+            const before = currentFolders.length;
+            currentFolders = currentFolders.filter(l => !/^lista_archivos\.txt$/i.test(l.trim()));
+            if (currentFolders.length < before) {
+                showToast('⚠ Se excluyó lista_archivos.txt de la lista');
+            }
             const commands = [], preview = [];
 
             currentFolders.forEach((currentName, index) => {
