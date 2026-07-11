@@ -340,6 +340,13 @@ Report - Archivo 03
             }
         }
 
+        // ── Convertir caracteres no-ASCII (acentos, ñ, etc.) en comodines ? ──
+        // Esto evita por completo los problemas de codificación/codepage,
+        // ya que "?" en CMD coincide con cualquier carácter en esa posición.
+        function toSafePattern(name) {
+            return name.replace(/[^\x00-\x7F]/g, '?');
+        }
+
         // ── Generar comandos ──────────────────────────────────────────
         function generateRenameCommands() {
             const currentFoldersText = document.getElementById('currentFolders').value.trim();
@@ -367,7 +374,8 @@ Report - Archivo 03
                     ? currentNumber.toString().padStart(2, '0')
                     : currentNumber.toString();
                 const newName = `${newBaseName} ${newNum}${ext}`;
-                if (trimmed !== newName) commands.push(`ren "${trimmed}" "${newName}"`);
+                const safeSource = toSafePattern(trimmed);
+                if (trimmed !== newName) commands.push(`ren "${safeSource}" "${newName}"`);
                 preview.push({ current: trimmed, new: newName });
             });
 
