@@ -43,7 +43,7 @@
                     <li>Lista los nombres actuales de tus archivos/carpetas (uno por línea) o arrastra un .txt</li>
                     <li>Configura el nuevo formato de nombres deseado</li>
                     <li>Genera y copia los comandos resultantes</li>
-                    <li>Ejecuta en Command Prompt desde la ubicación correcta</li>
+                    <li>Ejecuta en PowerShell (no Command Prompt/cmd) desde la ubicación correcta</li>
                 </ol>
             </div>
 
@@ -74,11 +74,12 @@ Report - Archivo 03
                 </div>
 
                 <div id="dirCommandSection" style="display:none; margin-top: 20px;">
-                    <p>Ejecuta este comando en Command Prompt desde la carpeta donde están tus archivos:</p>
+                    <p>Abre <strong>PowerShell</strong> (no Command Prompt/cmd) en la carpeta donde están tus archivos y ejecuta:</p>
                     <div class="output" style="margin-top:10px;">
-                        <div class="command">dir /b &gt; lista_archivos.txt</div>
+                        <div class="command">Get-ChildItem -Name | Out-File -FilePath lista_archivos.txt -Encoding utf8</div>
                     </div>
-                    <p style="margin-top: 15px;">Esto creará un archivo "lista_archivos.txt" con todos los nombres. Abre ese archivo, copia el contenido y pégalo en el campo de arriba.</p>
+                    <p style="margin-top: 15px;">Esto creará un archivo "lista_archivos.txt" con todos los nombres, en UTF-8 (sin corromper acentos/ñ). Abre ese archivo, copia el contenido y pégalo en el campo de arriba, o simplemente arrástralo a la zona de arriba.</p>
+                    <p style="margin-top: 10px;"><em>Tip: en la carpeta, Mayús+clic derecho → "Abrir ventana de PowerShell aquí" (o "Abrir en Terminal" y elegir la pestaña PowerShell).</em></p>
                 </div>
             </div>
 
@@ -137,7 +138,7 @@ Report - Archivo 03
                 <strong>IMPORTANTE - LEER ANTES DE USAR:</strong>
                 <ul style="margin-top: 15px; padding-left: 25px;">
                     <li>Haz una copia de seguridad de tus archivos antes de ejecutar</li>
-                    <li>Los comandos deben ejecutarse desde la carpeta donde están ubicados los archivos</li>
+                    <li>Pega el resultado en una ventana de <strong>PowerShell</strong> (no Command Prompt/cmd), abierta desde la carpeta donde están ubicados los archivos</li>
                     <li>Si hay espacios en los nombres, asegúrate de que estén entre comillas</li>
                     <li>Prueba primero con un archivo para verificar que funciona correctamente</li>
                 </ul>
@@ -334,17 +335,24 @@ Report - Archivo 03
             // sin scrollIntoView
             if (!dirGenerated) {
                 dirGenerated = true;
-                navigator.clipboard.writeText('dir /b > lista_archivos.txt').then(() => {
+                navigator.clipboard.writeText('Get-ChildItem -Name | Out-File -FilePath lista_archivos.txt -Encoding utf8').then(() => {
                     showToast('✓ Comando DIR copiado');
                 });
             }
         }
 
         // ── Convertir caracteres no-ASCII (acentos, ñ, etc.) en comodines ? ──
-        // Esto evita por completo los problemas de codificación/codepage,
-        // ya que "?" en CMD coincide con cualquier carácter en esa posición.
+        // Esto evita por completo los problemas de codificación/codepage:
+        // en PowerShell, "?" en un patrón -like coincide con cualquier
+        // carácter en esa posición, sin importar cómo esté codificado el
+        // acento real en disco ni cómo se haya guardado este script.
         function toSafePattern(name) {
             return name.replace(/[^\x00-\x7F]/g, '?');
+        }
+
+        // Escapar un string para usarlo dentro de comillas dobles en PowerShell
+        function psEscape(str) {
+            return str.replace(/`/g, '``').replace(/\$/g, '`$').replace(/"/g, '`"');
         }
 
         // ── Generar comandos ──────────────────────────────────────────
@@ -374,8 +382,15 @@ Report - Archivo 03
                     ? currentNumber.toString().padStart(2, '0')
                     : currentNumber.toString();
                 const newName = `${newBaseName} ${newNum}${ext}`;
-                const safeSource = toSafePattern(trimmed);
-                if (trimmed !== newName) commands.push(`ren "${safeSource}" "${newName}"`);
+                const safePattern = psEscape(toSafePattern(trimmed));
+                const safeNewName = psEscape(newName);
+                if (trimmed !== newName) {
+                    commands.push(
+                        `$m = Get-ChildItem -LiteralPath . | Where-Object { $_.Name -like "${safePattern}" } | Select-Object -First 1; ` +
+                        `if ($m) { Rename-Item -LiteralPath $m.FullName -NewName "${safeNewName}"; Write-Host "OK: $($m.Name) -> ${safeNewName}" -ForegroundColor Green } ` +
+                        `else { Write-Host "NO ENCONTRADO: ${safePattern}" -ForegroundColor Red }`
+                    );
+                }
                 preview.push({ current: trimmed, new: newName });
             });
 
@@ -395,19 +410,18 @@ Report - Archivo 03
 
         function buildCommandText(commands) {
             return [
-                '@echo off',
-                'chcp 65001 > nul',
-                'REM ===== REPORT NAME - SCRIPT DE RENOMBRADO =====',
-                'REM Ejecutar desde la carpeta donde están ubicados los archivos',
-                'echo Iniciando proceso de renombrado...',
-                'echo.',
+                '# ===== REPORT NAME - SCRIPT DE RENOMBRADO (PowerShell) =====',
+                '# Pega esto en una ventana de PowerShell (NO Command Prompt/cmd)',
+                '# abierta en la carpeta donde están ubicados los archivos',
+                'Write-Host "Iniciando proceso de renombrado..."',
+                'Write-Host ""',
                 '',
                 ...commands,
-                'echo.',
-                'echo Proceso de renombrado completado exitosamente!',
-                'echo ===== REPORT NAME =====',
-                'pause'
+                'Write-Host ""',
+                'Write-Host "Proceso de renombrado completado exitosamente!"',
+                'Write-Host "===== REPORT NAME ====="'
             ].join('\n');
+
         }
 
         function displayPreview(preview) {
